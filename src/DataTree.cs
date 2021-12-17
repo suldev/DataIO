@@ -7,7 +7,14 @@ namespace Slowcat.Data
     {
         public string Name;
         public string Description;
-        private List<TreeNode> Nodes;
+        public int Count
+        {
+            get
+            {
+                return Nodes.Count;
+            }
+        }
+        private List<TreeNode> Nodes = new List<TreeNode>();
         private int _depth;
 
         public void Add(TreeNode newNode)

@@ -10,6 +10,7 @@ namespace Slowcat.Data
     {
         public enum FileMode
         {
+            Internal,
             ReadOnly,
             ReadWrite,
             CreateWrite
@@ -26,8 +27,17 @@ namespace Slowcat.Data
         private readonly string FilePath;
         private List<DataTable> SQLiteDataTables = new List<DataTable>();
         private List<DataTable> MemoryDataTables = new List<DataTable>();
-        private SqliteConnection SqliteFile;
-        private readonly FileMode Mode;
+        private SqliteConnection SqliteFile = null;
+        private readonly FileMode Mode = FileMode.Internal;
+
+        /// <summary>
+        /// SQLite constructor.
+        /// In-memory only DataTable (no save)
+        /// </summary>
+        public SQLite()
+        {
+            SQLiteDataTables = null;
+        }
 
         /// <summary>
         /// SQLite constructor.
@@ -63,19 +73,25 @@ namespace Slowcat.Data
                 case FileMode.ReadWrite:
                     connection.Mode =  SqliteOpenMode.ReadWrite;
                     break;
-                default:
+                case FileMode.ReadOnly:
                     connection.Mode = SqliteOpenMode.ReadOnly;
                     break;
+                default:
+                    return false;
             }
+
+            /* Open SQLite database file */
             SqliteFile = new SqliteConnection(connection.ConnectionString);
             SqliteFile.Open();
             if (SqliteFile.State == ConnectionState.Closed)
                 return false;
-            List<DataTable> tables = new List<DataTable>();
-            DataTable metaTable = new DataTable();
+            if (Mode == FileMode.CreateWrite)
+                return true;
+
+            DataTable sqliteMasterTable = new DataTable();
             SqliteCommand cmd = new SqliteCommand("SELECT name FROM sqlite_master WHERE type='table' and name NOT LIKE 'sqlite_%'", SqliteFile);
-            metaTable.Load(cmd.ExecuteReader(CommandBehavior.KeyInfo));
-            foreach (DataRow row in metaTable.Rows)
+            sqliteMasterTable.Load(cmd.ExecuteReader(CommandBehavior.KeyInfo));
+            foreach (DataRow row in sqliteMasterTable.Rows)
             {
                 string tableName = row[0].ToString();
                 DataTable dataTable = new DataTable(tableName);
@@ -85,16 +101,18 @@ namespace Slowcat.Data
                 SQLiteDataTables.Add(dataTable);
                 dbReader.Close();
             }
-            MemoryDataTables = SQLiteDataTables;
+            if(Mode != FileMode.CreateWrite)
+                MemoryDataTables = SQLiteDataTables;
             return true;
         }
 
         /// <summary>
         /// Save all changes to disk
+        /// WARNING: In CreateWrite mode, this will overwrite any existing database file
         /// </summary>
         public bool Write()
         {
-            if (Mode == FileMode.ReadOnly)
+            if (Mode == FileMode.ReadOnly || Mode == FileMode.Internal)
                 return false;
             if (SqliteFile.State == ConnectionState.Closed)
                 return false;
@@ -104,6 +122,9 @@ namespace Slowcat.Data
             {
                 // Skip over this table if the name is empty
                 if (string.IsNullOrEmpty(dataTable.TableName))
+                    continue;
+                // Skip over this table if it is empty
+                if (dataTable.Columns.Count == 0)
                     continue;
 
                 SqliteCommand cmd;
@@ -172,22 +193,40 @@ namespace Slowcat.Data
             return true;
         }
 
+        public void Close()
+        {
+            if (SqliteFile != null && SqliteFile.State != ConnectionState.Closed)
+                SqliteFile.Close();
+            
+            SQLiteDataTables = new List<DataTable>();
+            MemoryDataTables = new List<DataTable>();
+        }
+
         /// <summary>
-        /// Save all changes into DataTable Memory.
+        /// Save all changes into DataTable Memory
+        /// This command is not available in ReadOnly file mode, as no data is planned to be written
+        /// This command is not available in Internal file mode, as no database file is open
         /// This command does not write to the SQLiteDatabase
         /// Use Write() after commit to save changes to disk
         /// </summary>
         public void Commit()
         {
-            SQLiteDataTables = MemoryDataTables;
+            if (Mode == FileMode.ReadOnly || Mode == FileMode.Internal)
+                throw new Exception("Cannot commit changes in ReadOnly or Internal mode");
+            else
+                SQLiteDataTables = MemoryDataTables;
         }
 
         /// <summary>
         /// Toss all unsaved changes
+        /// This command is not available in CreateWrite file mode, as the database file is assumed empty
         /// </summary>
         public void RollBack()
         {
-            MemoryDataTables = SQLiteDataTables;
+            if (Mode == FileMode.CreateWrite)
+                throw new Exception("Cannot rollback changes in CreateWrite mode");
+            else
+                MemoryDataTables = SQLiteDataTables;
         }
 
         /// <summary>
@@ -202,17 +241,16 @@ namespace Slowcat.Data
             return true;
         }
 
-        /// <summary>
-        /// Create a blank in-memory table
-        /// </summary>
-        /// <param name="tableName">Name for the new table</param>
-        public bool NewTable(string tableName)
+        public DataTable this[int index]
         {
-            if (MemoryDataTables.Exists(x => x.TableName == tableName))
-                return false;
-            MemoryDataTables.Add(new DataTable(tableName));
-            return true;
+            get => index >= 0 && index < MemoryDataTables.Count ? MemoryDataTables[index] : null;
         }
+
+        public DataTable this[string tableName]
+        {
+            get => MemoryDataTables.FindIndex(x => x.TableName == tableName) > -1 ? MemoryDataTables.Find(x => x.TableName == tableName) : null;
+        }
+
 
         /// <summary>
         /// Add new column to specified in-memory DataTable
@@ -298,7 +336,7 @@ namespace Slowcat.Data
         /// <param name="row">Row number of specified DataTable to add to</param>
         /// <param name="col">Column number of specified DataTable to add to</param>
         /// <param name="data">The value to add to cell</param>
-        public void SetData(String tableName, int row, int col, int data)
+        public void SetData(string tableName, int row, int col, int data)
         {
             int tableIndex = MemoryDataTables.FindIndex(x => x.TableName == tableName);
             if (tableIndex < 0)
@@ -319,7 +357,7 @@ namespace Slowcat.Data
         /// <param name="row">Row number of specified DataTable to add to</param>
         /// <param name="col">Column number of specified DataTable to add to</param>
         /// <param name="data">The value to add to cell</param>
-        public void SetData(String tableName, int row, int col, float data)
+        public void SetData(string tableName, int row, int col, float data)
         {
             int tableIndex = MemoryDataTables.FindIndex(x => x.TableName == tableName);
             if (tableIndex < 0)
@@ -340,7 +378,7 @@ namespace Slowcat.Data
         /// <param name="row">Row number of specified DataTable to add to</param>
         /// <param name="col">Column number of specified DataTable to add to</param>
         /// <param name="data">The value to add to cell</param>
-        public void SetData(String tableName, int row, int col, double data)
+        public void SetData(string tableName, int row, int col, double data)
         {
             int tableIndex = MemoryDataTables.FindIndex(x => x.TableName == tableName);
             if (tableIndex < 0)
@@ -385,7 +423,7 @@ namespace Slowcat.Data
         /// <param name="row"></param>
         /// <param name="col"></param>
         /// <returns></returns>
-        public object GetData(string tableName, int row, int col)
+        public T GetData<T>(string tableName, int row, int col)
         {
             int tableIndex = MemoryDataTables.FindIndex(x => x.TableName == tableName);
             if (tableIndex < 0)
@@ -394,7 +432,15 @@ namespace Slowcat.Data
                 throw new IndexOutOfRangeException("Column index is out of range");
             if (row >= MemoryDataTables[tableIndex].Rows.Count)
                 throw new IndexOutOfRangeException("Row index is out of range");
-            return MemoryDataTables[tableIndex].Rows[row][col];
+            object result = MemoryDataTables[tableIndex].Rows[row][col];
+            try
+            {
+                return (T)Convert.ChangeType(result, typeof(T));
+            }
+            catch(Exception e)
+            {
+                return default(T);
+            }
         }
 
         /// <summary>
@@ -427,6 +473,14 @@ namespace Slowcat.Data
             if (col >= MemoryDataTables[tableIndex].Columns.Count)
                 throw new IndexOutOfRangeException("Column index is out of range");
             return MemoryDataTables[tableIndex].Columns[col].DataType;
+        }
+
+        /// <summary>
+        /// Retrieves the total number of tables found in the specified in-memory Database
+        /// </summary>
+        public int GetTableCount()
+        {
+            return MemoryDataTables.Count;
         }
 
         /// <summary>

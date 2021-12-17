@@ -8,6 +8,13 @@ namespace Slowcat.Data
         internal TreeNode Parent = null;
         internal List<TreeNode> Children = new List<TreeNode>();
         internal List<TreeNode> Siblings = new List<TreeNode>();
+        public int Count
+        {
+            get
+            {
+                return Children.Count;
+            }
+        }
         public object Value;
         
         public void Add(TreeNode newNode)
@@ -32,6 +39,13 @@ namespace Slowcat.Data
         public TreeNode this[int index]
         {
             get => index < Children.Count ? Children[index] : null;
+        }
+
+        public TreeNode Sibling(int index)
+        {
+            if (index > 0 || index < Siblings.Count)
+                return Siblings[index];
+            return null;
         }
 
         public void RemoveAll()

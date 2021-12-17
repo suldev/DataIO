@@ -6,3 +6,5 @@
 *.cache
 /obj
 /bin
+/test/obj
+/src/obj
