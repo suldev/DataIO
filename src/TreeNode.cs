@@ -6,7 +6,7 @@ namespace DataTree
     public class TreeNode
     {
         internal TreeNode Parent = null;
-        private List<TreeNode> Children = new List<TreeNode>();
+        internal List<TreeNode> Children = new List<TreeNode>();
         internal List<TreeNode> Siblings = new List<TreeNode>();
         public object Value;
         
