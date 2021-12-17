@@ -12,16 +12,15 @@ namespace DataTree
         void Add(TreeNode newNode)
         {
             newNode.Parent = null;
-            newNode.Siblings = new List<TreeNode>();
-            foreach(TreeNode child in Nodes)
+            foreach(TreeNode root in Nodes)
             {
-                child.Siblings.Add(newNode);
-                newNode.Siblings.Add(child);
+                root.Siblings.Add(newNode);
+                newNode.Siblings.Add(root);
             }
             Nodes.Add(newNode);
         }
 
-        public TreeNode this[uint index]
+        public TreeNode this[int index]
         {
             get => index < Nodes.Count ? Nodes[index] : null;
         }
@@ -31,7 +30,7 @@ namespace DataTree
             Nodes = new List<TreeNode>();
         }
 
-        public void RemoveAt(uint index)
+        public void RemoveAt(int index)
         {
             if (index < Nodes.Count)
                 Remove(Nodes[index]);

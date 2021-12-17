@@ -5,11 +5,11 @@ namespace DataTree
 {
     public class TreeNode
     {
-        private TreeNode Parent;
-        private List<TreeNode> Children;
-        private List<TreeNode> Siblings;
+        internal TreeNode Parent = null;
+        private List<TreeNode> Children = new List<TreeNode>();
+        internal List<TreeNode> Siblings = new List<TreeNode>();
         public object Value;
-
+        
         public void Add(TreeNode newNode)
         {
             newNode.Parent = this;
@@ -22,14 +22,14 @@ namespace DataTree
             Children.Add(newNode);
         }
 
-        public void Insert(TreeNode newNode, uint index)
+        public void Insert(TreeNode newNode, int index)
         {
             foreach (TreeNode child in Children)
                 child.Siblings.Insert(index, newNode);
             Children.Insert(index, newNode);
         }
 
-        public TreeNode this[uint index]
+        public TreeNode this[int index]
         {
             get => index < Children.Count ? Children[index] : null;
         }
@@ -39,7 +39,7 @@ namespace DataTree
             Children = new List<TreeNode>();
         }
 
-        public void RemoveAt(uint index)
+        public void RemoveAt(int index)
         {
             if (index < Children.Count)
                 Remove(Children[index]);
