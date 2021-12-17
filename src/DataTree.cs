@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DataTree
+namespace Slowcat.Data
 {
     public class DataTree
     {
