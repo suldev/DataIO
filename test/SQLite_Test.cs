@@ -32,11 +32,11 @@ namespace DataIOTest
             try
             {
                 dataBase = new SQLite();
-                ConditionTest(dataBase.GetTableCount() == 0);
+                ConditionTest<int>(dataBase.GetTableCount(), Condition.EQ, 0);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -50,11 +50,11 @@ namespace DataIOTest
                 dataBase.AddTable(new DataTable("Table1"));
                 dataBase.AddTable(new DataTable("Table2"));
                 dataBase.AddTable(new DataTable("Table3"));
-                ConditionTest(dataBase.GetTableCount() == 3);
+                ConditionTest<int>(dataBase.GetTableCount(), Condition.EQ, 3);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -69,11 +69,11 @@ namespace DataIOTest
                 dataBase.AddColumn("Table1", "Column1", SQLite.DataType.Int, false);
                 dataBase.AddColumn("Table1", "Column2", SQLite.DataType.Int, false);
                 dataBase.AddColumn("Table1", "Column3", SQLite.DataType.Int, false);
-                ConditionTest(dataBase["Table1"].Columns.Count == 3);
+                ConditionTest<int>(dataBase["Table1"].Columns.Count, Condition.EQ, 3);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -89,11 +89,11 @@ namespace DataIOTest
                 dataBase.AddRow("Table1");
                 dataBase.AddRow("Table1");
                 dataBase.AddRow("Table1");
-                ConditionTest(dataBase["Table1"].Rows.Count == 3);
+                ConditionTest<int>(dataBase["Table1"].Rows.Count, Condition.EQ, 3);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -108,11 +108,11 @@ namespace DataIOTest
                 dataBase.AddColumn("Table1", "Column1", SQLite.DataType.Int, false);
                 dataBase.AddRow("Table1");
                 dataBase.SetData("Table1", 0, 0, 1);
-                ConditionTest(dataBase.GetData<int>("Table1", 0, 0) == 1);
+                ConditionTest<int>(dataBase.GetData<int>("Table1", 0, 0), Condition.EQ, 1);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -127,11 +127,11 @@ namespace DataIOTest
                 dataBase.AddColumn("Table1", "Column1", SQLite.DataType.Int, false);
                 dataBase.AddRow("Table1");
                 dataBase.SetData("Table1", 0, 0, 1);
-                ConditionTest(dataBase.GetData<double>("Table1", 0, 0) == 1.0);
+                ConditionTest<double>(dataBase.GetData<double>("Table1", 0, 0), Condition.EQ, 1.0);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -147,11 +147,11 @@ namespace DataIOTest
                 dataBase.AddRow("Table1");
                 dataBase.SetData("Table1", 0, 0, "String");
                 int test = dataBase.GetData<int>("Table1", 0, 0);
-                ConditionTest(test == default(int));
+                ConditionTest<int>(test, Condition.EQ, default(int));
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -162,12 +162,12 @@ namespace DataIOTest
             try
             {
                 dataBase = new SQLite("newDatabase.db", SQLite.FileMode.CreateWrite);
-                ConditionTest(dataBase.Open());
+                ConditionTest<bool>(dataBase.Open(), Condition.EQ, true);
                 dataBase.Close();
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -178,12 +178,12 @@ namespace DataIOTest
             try
             {
                 dataBase = new SQLite("newDatabase.db", SQLite.FileMode.Internal);
-                ConditionTest(dataBase.Open() == false);
+                ConditionTest<bool>(dataBase.Open(), Condition.EQ, false);
                 dataBase.Close();
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -194,12 +194,12 @@ namespace DataIOTest
             try
             {
                 dataBase = new SQLite("newDatabase.db", SQLite.FileMode.ReadWrite);
-                ConditionTest(dataBase.Open());
+                ConditionTest<bool>(dataBase.Open(), Condition.EQ, true);
                 dataBase.Close();
             }
             catch (Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -218,12 +218,12 @@ namespace DataIOTest
                 dataBase.Close();
                 dataBase = new SQLite("newDatabase.db", SQLite.FileMode.ReadOnly);
                 dataBase.Open();
-                ConditionTest(dataBase.GetTableCount() == 1);
+                ConditionTest<int>(dataBase.GetTableCount(), Condition.EQ, 1);
                 dataBase.Close();
             }
             catch (Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -240,12 +240,12 @@ namespace DataIOTest
                 dataBase.Close();
                 dataBase = new SQLite("newDatabase.db", SQLite.FileMode.ReadOnly);
                 dataBase.Open();
-                ConditionTest(dataBase.GetTableCount() == 1);
+                ConditionTest<int>(dataBase.GetTableCount(), Condition.EQ, 1);
                 dataBase.Close();
             }
             catch (Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -257,13 +257,13 @@ namespace DataIOTest
             {
                 dataBase = new SQLite("newDatabase.db", SQLite.FileMode.ReadOnly);
                 dataBase.Open();
-                ConditionTest(dataBase.Write() == false);
+                ConditionTest<bool>(dataBase.Write(), Condition.EQ, false);
                 dataBase.Close();
 
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -284,12 +284,12 @@ namespace DataIOTest
                 dataBase.Close();
                 dataBase = new SQLite("newDatabase.db", SQLite.FileMode.ReadOnly);
                 dataBase.Open();
-                ConditionTest(dataBase.GetData<int>("Table1", 0, 0) == 100);
+                ConditionTest<int>(dataBase.GetData<int>("Table1", 0, 0), Condition.EQ, 100);
                 dataBase.Close();
             }
             catch (Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }

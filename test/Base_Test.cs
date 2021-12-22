@@ -28,7 +28,17 @@ namespace DataIOTest
             PASSED,
             FAILED
         }
-        protected void ConsoleMessage(State state)
+        public enum Condition
+        {
+            EQ,
+            NE,
+            LT,
+            LE,
+            GT,
+            GE
+        }
+
+        protected void ConsoleMessage(State state, string observed, string actual)
         {
             string sState;
             bool newLine;
@@ -61,6 +71,9 @@ namespace DataIOTest
             Console.Write(sState);
             Console.ForegroundColor = defaultColor;
             Console.Write("] " + TestDescription);
+            if(!string.IsNullOrEmpty(actual) && !string.IsNullOrEmpty(observed))
+                Console.Write(". Expected " + actual + " but received " + observed);
+            
             if (newLine)
                 Console.Write("\n\r");
             else
@@ -71,12 +84,42 @@ namespace DataIOTest
         {
             TestDescription = testDescription;
             _index++;
-            ConsoleMessage(State.RUNNING);
+            ConsoleMessage(State.RUNNING, null, null);
         }
 
-        protected void ConditionTest(bool result)
+        protected void ConditionTest<T>(T observed, Condition condition, T actual)
         {
-            ConsoleMessage(result ? State.PASSED : State.FAILED);
+            bool result = false;
+            if(!(observed is IComparable))
+            {
+                if (condition != Condition.EQ && condition != Condition.NE)
+                    throw new ArgumentException("Condition Test Failure: Received Non IComparable when comparison was requested");
+            }
+            switch(condition)
+            {
+                case Condition.EQ:
+                    result = object.Equals(actual, observed);
+                    break;
+                case Condition.NE:
+                    result = !object.Equals(actual, observed);
+                    break;
+                case Condition.LT:
+                    result = ((IComparable)observed).CompareTo(actual) < 0;
+                    break;
+                case Condition.LE:
+                    result = ((IComparable)observed).CompareTo(actual) <= 0;
+                    break;
+                case Condition.GT:
+                    result = ((IComparable)observed).CompareTo(actual) > 0;
+                    break;
+                case Condition.GE:
+                    result = ((IComparable)observed).CompareTo(actual) >= 0;
+                    break;
+            }
+            if (result)
+                ConsoleMessage(State.PASSED, null, null);
+            else
+                ConsoleMessage(State.FAILED, observed.ToString(), actual.ToString());
         }
 
         protected void DisplayException(Exception e)

@@ -8,6 +8,7 @@ namespace Slowcat.Data
         internal TreeNode Parent = null;
         internal List<TreeNode> Children = new List<TreeNode>();
         internal List<TreeNode> Siblings = new List<TreeNode>();
+        internal int Depth = -1;
         public int Count
         {
             get
@@ -26,6 +27,7 @@ namespace Slowcat.Data
                 child.Siblings.Add(newNode);
                 newNode.Siblings.Add(child);
             }
+            newNode.Depth = Depth + 1;
             Children.Add(newNode);
         }
 
@@ -64,6 +66,13 @@ namespace Slowcat.Data
             foreach (TreeNode child in Children)
                 child.Siblings.Remove(deadNode);
             Children.Remove(deadNode);
+        }
+
+        internal void SetDepth(int depth)
+        {
+            Depth = depth;
+            foreach (TreeNode child in Children)
+                SetDepth(Depth + 1);
         }
     }
 }

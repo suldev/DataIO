@@ -29,11 +29,11 @@ namespace DataIOTest
             tree = new DataTree();
             try
             {
-                ConditionTest(tree.Count == 0);
+                ConditionTest<int>(tree.Count, Condition.EQ, 0);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -45,11 +45,11 @@ namespace DataIOTest
             try
             {
                 tree.Add(new TreeNode());
-                ConditionTest(tree.Count == 1);
+                ConditionTest<int>(tree.Count, Condition.EQ, 1);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -62,11 +62,11 @@ namespace DataIOTest
             {
                 tree.Add(new TreeNode());
                 tree.RemoveAt(0);
-                ConditionTest(tree.Count == 0);
+                ConditionTest<int>(tree.Count, Condition.EQ, 0);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -79,11 +79,11 @@ namespace DataIOTest
             {
                 tree.Add(new TreeNode());
                 tree.Add(new TreeNode());
-                ConditionTest(tree[0].Sibling(0) == tree[1]);
+                ConditionTest<TreeNode>(tree[0].Sibling(0), Condition.EQ, tree[1]);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -97,11 +97,11 @@ namespace DataIOTest
                 tree.Add(new TreeNode());
                 tree.Add(new TreeNode());
                 tree.RemoveAt(1);
-                ConditionTest(tree[0].Sibling(0) == null);
+                ConditionTest<TreeNode>(tree[0].Sibling(0), Condition.EQ, null);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -114,11 +114,11 @@ namespace DataIOTest
             {
                 tree.Add(new TreeNode());
                 tree[0].Add(new TreeNode());
-                ConditionTest(tree[0][0] != null);
+                ConditionTest<TreeNode>(tree[0][0], Condition.NE, null);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -132,11 +132,11 @@ namespace DataIOTest
                 tree.Add(new TreeNode());
                 tree[0].Add(new TreeNode());
                 tree[0].RemoveAt(0);
-                ConditionTest(tree[0].Count == 0);
+                ConditionTest<int>(tree[0].Count, Condition.EQ, 0);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -148,11 +148,11 @@ namespace DataIOTest
             tree = new DataTree();
             try
             {
-                ConditionTest(tree.Depth() == 0);
+                ConditionTest<int>(tree.Depth(), Condition.EQ, 0);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -166,11 +166,11 @@ namespace DataIOTest
                 tree.Add(new TreeNode());
                 tree.Add(new TreeNode());
                 tree[1].Add(new TreeNode());
-                ConditionTest(tree.Depth() == 2);
+                ConditionTest<int>(tree.Depth(), Condition.EQ, 2);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -196,11 +196,11 @@ namespace DataIOTest
                 tree[3][1][0].Add(new TreeNode());
                 tree[3][1][0][0].Add(new TreeNode());
                 tree.Add(new TreeNode());
-                ConditionTest(tree.Depth() == 5);
+                ConditionTest<int>(tree.Depth(), Condition.EQ, 5);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -213,11 +213,11 @@ namespace DataIOTest
             {
                 tree.Add(new TreeNode());
                 tree[0].Value = 5;
-                ConditionTest(Convert.ToInt32(tree[0].Value) == 5);
+                ConditionTest<int>(Convert.ToInt32(tree[0].Value), Condition.EQ, 5);
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }
@@ -232,11 +232,11 @@ namespace DataIOTest
                 tree[0].Value = 5;
                 int oldValue = Convert.ToInt32(tree[0].Value);
                 tree[0].Value = "String";
-                ConditionTest(oldValue == 5 && tree[0].Value.ToString() == "String");
+                ConditionTest<string>(tree[0].Value.ToString(), Condition.EQ, "String");
             }
             catch(Exception e)
             {
-                ConsoleMessage(State.FAILED);
+                ConsoleMessage(State.FAILED, null, null);
                 DisplayException(e);
             }
         }

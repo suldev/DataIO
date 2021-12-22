@@ -15,8 +15,11 @@ namespace Slowcat.Data
             }
         }
         private List<TreeNode> Nodes = new List<TreeNode>();
-        private int _depth;
 
+        /// <summary>
+        /// Add a new root node to the DataTree
+        /// </summary>
+        /// <param name="newNode">New root TreeNode to be added at the end of the collection</param>
         public void Add(TreeNode newNode)
         {
             newNode.Parent = null;
@@ -25,6 +28,7 @@ namespace Slowcat.Data
                 root.Siblings.Add(newNode);
                 newNode.Siblings.Add(root);
             }
+            newNode.SetDepth(1);
             Nodes.Add(newNode);
         }
 
@@ -33,17 +37,28 @@ namespace Slowcat.Data
             get => index < Nodes.Count ? Nodes[index] : null;
         }
 
+        /// <summary>
+        /// Remove all root nodes and children from DataTree
+        /// </summary>
         public void RemoveAll()
         {
             Nodes = new List<TreeNode>();
         }
 
+        /// <summary>
+        /// Remove a specific root node and all children from DataTree
+        /// </summary>
+        /// <param name="index">Index of root node to remove</param>
         public void RemoveAt(int index)
         {
             if (index < Nodes.Count)
                 Remove(Nodes[index]);
         }
 
+        /// <summary>
+        /// Remove a specific root node and all children from DataTree
+        /// </summary>
+        /// <param name="deadNode">Available root node to remove</param>
         public void Remove(TreeNode deadNode)
         {
             foreach (TreeNode child in Nodes)
@@ -51,20 +66,35 @@ namespace Slowcat.Data
             Nodes.Remove(deadNode);
         }
 
-        public int Depth()
+        /// <summary>
+        /// Calculate the width of the tree at the requested depth. Returned value is the number of nodes with the same depth
+        /// </summary>
+        public int Width(int depth)
         {
-            _depth = 0;
-            int ddepth = 1;
-            foreach (TreeNode node in Nodes)
-                Depth(node, ddepth);
-            return _depth;
+            foreach(TreeNode child in Nodes)
+            {
+
+            }
+            return 0;
         }
 
-        private void Depth(TreeNode parent, int initialDepth)
+        /// <summary>
+        /// Calculate the depth of the tree. Returned value is the node with the most parents.
+        /// </summary>
+        public int Depth()
         {
-            _depth = Math.Max(_depth, initialDepth++);
+            int depth = 0;
+            foreach (TreeNode child in Nodes)
+                depth = Math.Max(depth, Depth(child, depth));
+            return depth;
+        }
+
+        private int Depth(TreeNode parent, int initialDepth)
+        {
+            int depth = initialDepth;
             foreach (TreeNode child in parent.Children)
-                Depth(child, initialDepth);
+                depth = Math.Max(depth, Math.Max(child.Depth, Depth(child, depth)));
+            return depth;
         }
     }
 }
